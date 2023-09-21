@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using QLBH.Controllers.Data;
 using QLBH.Controllers.Model;
@@ -13,11 +14,14 @@ namespace QLBH.Controllers
     [ApiController]
     public class ProductController : ControllerBase
     {
+        //gọi cơ sở dữ liệu để dùng
         private readonly MyDbContext con;
+        //gán biến cho cơ sở dữ liệu
         public ProductController(MyDbContext myDb)
         {
             con = myDb;
         }
+        //lấy toàn bộ sản phẩm
         [HttpGet]
         public IActionResult GetAll()
         {
@@ -31,6 +35,7 @@ namespace QLBH.Controllers
                 return BadRequest();
             }
         }
+        //lấy sản phẩm bằng việc tìm kiếm
         [HttpGet("{id}")]
         public IActionResult GetById(Guid id)
         {
@@ -51,7 +56,9 @@ namespace QLBH.Controllers
                 return BadRequest();
             }
         }
+        // Tạo mới sản phẩm 
         [HttpPost()]
+        [Authorize]
         public IActionResult Createnew(ProductModel model)
         {
             try
@@ -67,6 +74,57 @@ namespace QLBH.Controllers
                 con.Add(product);
                 con.SaveChanges();
                 return StatusCode(StatusCodes.Status201Created, product);
+            }
+            catch
+            {
+                return BadRequest();
+            }
+        }
+
+        // Chỉnh sửa thông tin sản phẩm
+        [HttpPut("{id}")]
+        public IActionResult UpdateById(Guid id, ProductModel model)
+        {
+            try
+            {
+                var product = con.products.FirstOrDefault(p => p.maSP == id);
+                if (product != null)
+                {
+                    product.TenSP = model.TenSP;
+                    product.DVT = model.DVT;
+                    product.GiaSP = model.GiaSP;
+                    product.giamgia = model.giamgia;
+                    product.Lton = model.Lton;
+                    con.SaveChanges();
+                    return NoContent();
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            catch
+            {
+                return BadRequest();
+            }
+        }
+            // Xóa một sản phẩm 
+            [HttpDelete("{id}")]   
+        public IActionResult DeleteById(Guid id)
+        {
+            try
+            {
+                var product = con.products.FirstOrDefault(p => p.maSP == id);
+                if (product != null)
+                {
+                    con.Remove(product);
+                    con.SaveChanges();
+                    return StatusCode(StatusCodes.Status200OK);
+                }
+                else
+                {
+                    return NotFound();
+                }
             }
             catch
             {

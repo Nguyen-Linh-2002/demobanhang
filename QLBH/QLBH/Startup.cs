@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
@@ -13,6 +13,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+
 
 namespace QLBH
 {
@@ -34,7 +38,24 @@ namespace QLBH
             services.AddDbContext<MyDbContext>(option=> {
                 option.UseSqlServer(Configuration.GetConnectionString("MyDb"));
             });
+            //Cấu hình cho authorize
+          
+            var secretkey = Configuration["Appsettings:SecretKey"];
+            var secretkeyBytes = Encoding.UTF8.GetBytes(secretkey);
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(opt=>
+            {
+                opt.TokenValidationParameters = new TokenValidationParameters
+                {
+                    //Tự cấp token
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
 
+                    // ký vào token
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(secretkeyBytes),
+                    ClockSkew= TimeSpan.Zero
+                };
+            });
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "QLBH", Version = "v1" });
