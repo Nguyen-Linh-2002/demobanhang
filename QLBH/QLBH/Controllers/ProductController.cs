@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using QLBH.Controllers.Data;
 using QLBH.Controllers.Model;
+using QLBH.Controllers.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +17,16 @@ namespace QLBH.Controllers
     {
         //gọi cơ sở dữ liệu để dùng
         private readonly MyDbContext con;
+        private readonly IProductRepository _productRepository;
+
+
+        //nhúng 
+        public ProductController(IProductRepository productRepository)
+        {
+            _productRepository = productRepository;
+        }
+ 
+
         //gán biến cho cơ sở dữ liệu
         public ProductController(MyDbContext myDb)
         {
@@ -27,33 +38,30 @@ namespace QLBH.Controllers
         {
             try
             {
-                var productlist = con.products.ToList();
-                return Ok(productlist);
+                return Ok(_productRepository.GetAll());
             }
             catch
             {
-                return BadRequest();
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
+
         //lấy sản phẩm bằng việc tìm kiếm
         [HttpGet("{id}")]
         public IActionResult GetById(Guid id)
         {
             try
             {
-                var product = con.products.FirstOrDefault(p => p.maSP == id);
-                if (product != null)
+                var data = _productRepository.GetById(id);
+                if(data!=null)
                 {
-                    return Ok(product);
+                    return Ok(data);
                 }
-                else
-                {
-                    return NotFound();
-                }
+                return NotFound();
             }
             catch
             {
-                return BadRequest();
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
         // Tạo mới sản phẩm 
@@ -63,49 +71,31 @@ namespace QLBH.Controllers
         {
             try
             {
-                var product = new Product
-                {
-                    TenSP = model.TenSP,
-                    DVT = model.DVT,
-                    GiaSP = model.GiaSP,
-                    giamgia = model.giamgia,
-                    Lton = model.Lton
-                };
-                con.Add(product);
-                con.SaveChanges();
-                return StatusCode(StatusCodes.Status201Created, product);
+
+                return Ok(_productRepository.Add(model));
             }
             catch
             {
-                return BadRequest();
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
 
         // Chỉnh sửa thông tin sản phẩm
         [HttpPut("{id}")]
-        public IActionResult UpdateById(Guid id, ProductModel model)
+        public IActionResult UpdateById(Guid id, ProductVM model)
         {
+            if(id!= model.maSP)
+            {
+                return NotFound();
+            }    
             try
             {
-                var product = con.products.FirstOrDefault(p => p.maSP == id);
-                if (product != null)
-                {
-                    product.TenSP = model.TenSP;
-                    product.DVT = model.DVT;
-                    product.GiaSP = model.GiaSP;
-                    product.giamgia = model.giamgia;
-                    product.Lton = model.Lton;
-                    con.SaveChanges();
-                    return NoContent();
-                }
-                else
-                {
-                    return NotFound();
-                }
+                 _productRepository.Update(model);
+                return NoContent();
             }
             catch
             {
-                return BadRequest();
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
             // Xóa một sản phẩm 
@@ -114,21 +104,17 @@ namespace QLBH.Controllers
         {
             try
             {
-                var product = con.products.FirstOrDefault(p => p.maSP == id);
-                if (product != null)
+                var data = _productRepository.GetById(id);
+                if (data != null)
                 {
-                    con.Remove(product);
-                    con.SaveChanges();
-                    return StatusCode(StatusCodes.Status200OK);
+                    _productRepository.Delete(id);
+                    return Ok();
                 }
-                else
-                {
-                    return NotFound();
-                }
+                return NotFound();
             }
             catch
             {
-                return BadRequest();
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
     }

@@ -16,7 +16,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-
+using QLBH.Controllers.Services;
 
 namespace QLBH
 {
@@ -34,10 +34,14 @@ namespace QLBH
         {
 
             services.AddControllers();
+            // cấu hình cho Interface
+            services.AddScoped<IProductRepository, ProductRepository>();
 
             services.AddDbContext<MyDbContext>(option=> {
                 option.UseSqlServer(Configuration.GetConnectionString("MyDb"));
             });
+
+           
             //Cấu hình cho authorize
           
             var secretkey = Configuration["Appsettings:SecretKey"];
