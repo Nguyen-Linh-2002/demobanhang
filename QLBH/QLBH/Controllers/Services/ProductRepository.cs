@@ -11,6 +11,7 @@ namespace QLBH.Controllers.Services
     {
         private readonly MyDbContext _con;
 
+        // Nhúng kết nối vào 
         public ProductRepository(MyDbContext conn)
         {
             _con = conn;
@@ -80,7 +81,7 @@ namespace QLBH.Controllers.Services
             return null;
         }
 
-        public void Update(ProductVM product)
+        public void Update(ProductVM product, Guid id)
         {
             var _product = _con.products.SingleOrDefault(pr => pr.maSP == id);
             _product.TenSP = product.TenSP;

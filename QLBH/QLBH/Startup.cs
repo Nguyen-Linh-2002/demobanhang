@@ -32,10 +32,15 @@ namespace QLBH
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
-            services.AddControllers();
+            //Cấu hình cho formatDatetime
+            services.AddControllers().AddJsonOptions(op => {
+                op.JsonSerializerOptions.Converters.Add( new DateConverter());
+            });
             // cấu hình cho Interface
             services.AddScoped<IProductRepository, ProductRepository>();
+            services.AddScoped<ICustomerRepository, CustomerRepository>();
+            services.AddScoped<IEmployeeRepository, EmployeeReponsitory>();
+
 
             services.AddDbContext<MyDbContext>(option=> {
                 option.UseSqlServer(Configuration.GetConnectionString("MyDb"));

@@ -1,7 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using QLBH.Controllers.Data;
 using QLBH.Controllers.Model;
 using QLBH.Controllers.Services;
 using System;
@@ -13,47 +11,35 @@ namespace QLBH.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ProductController : ControllerBase
+    public class customerController : ControllerBase
     {
-        //gọi cơ sở dữ liệu để dùng
-        //private readonly MyDbContext con;
-        private readonly IProductRepository _productRepository;
+        private readonly ICustomerRepository _customerRepository;
 
 
         //nhúng 
-        public ProductController(IProductRepository productRepository)
+        public customerController(ICustomerRepository customerRepository)
         {
-            _productRepository = productRepository;
+            _customerRepository = customerRepository;
         }
- 
-
-        //gán biến cho cơ sở dữ liệu
-        //public ProductController(MyDbContext myDb)
-        //{
-        //    con = myDb;
-        //}
-        //lấy toàn bộ sản phẩm
         [HttpGet]
         public IActionResult GetAll()
         {
             try
             {
-                return Ok(_productRepository.GetAll());
+                return Ok(_customerRepository.GetAll());
             }
             catch
             {
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
-
-        //lấy sản phẩm bằng việc tìm kiếm
         [HttpGet("{id}")]
         public IActionResult GetById(Guid id)
         {
             try
             {
-                var data = _productRepository.GetById(id);
-                if(data!=null)
+                var data = _customerRepository.GetById(id);
+                if (data != null)
                 {
                     return Ok(data);
                 }
@@ -66,31 +52,28 @@ namespace QLBH.Controllers
         }
         // Tạo mới sản phẩm 
         [HttpPost()]
-        [Authorize]
-        public IActionResult Createnew(ProductModel model)
+        public IActionResult Createnew(CustomerModel model)
         {
             try
             {
 
-                return Ok(_productRepository.Add(model));
+                return Ok(_customerRepository.Add(model));
             }
             catch
             {
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
-
-        // Chỉnh sửa thông tin sản phẩm
         [HttpPut("{id}")]
-        public IActionResult UpdateById(Guid id, ProductVM model)
+        public IActionResult UpdateById(Guid id, CustomerVM model)
         {
-            if(id!= model.maSP)
+            if (id != model.maKH)
             {
                 return NotFound();
-            }    
+            }
             try
             {
-                 _productRepository.Update(model, id);
+                _customerRepository.Update(model, id);
                 return NoContent();
             }
             catch
@@ -98,16 +81,16 @@ namespace QLBH.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
-            // Xóa một sản phẩm 
-            [HttpDelete("{id}")]   
+        // Xóa một sản phẩm 
+        [HttpDelete("{id}")]
         public IActionResult DeleteById(Guid id)
         {
             try
             {
-                var data = _productRepository.GetById(id);
+                var data = _customerRepository.GetById(id);
                 if (data != null)
                 {
-                    _productRepository.Delete(id);
+                    _customerRepository.Delete(id);
                     return Ok();
                 }
                 return NotFound();
@@ -117,5 +100,6 @@ namespace QLBH.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
+
     }
 }

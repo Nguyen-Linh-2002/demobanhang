@@ -11,7 +11,7 @@ namespace QLBH.Controllers.Services
         List<ProductVM> GetAll();
         ProductVM GetById(Guid id);
         ProductVM Add(ProductModel model);
-        void Update(ProductVM product);
+        void Update(ProductVM product, Guid id);
         void Delete(Guid id);
     }
 }
